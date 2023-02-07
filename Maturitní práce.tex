@@ -1,0 +1,1180 @@
+\documentclass[12pt]{report}			% Začátek dokumentu
+\usepackage{MP}						% Import stylu
+
+\author{Štěpán Turek}
+\title{Blockchain}
+\date{14. února 2023}
+\vedouci{Dr.rer.nat. Michal Kočer}
+\place{V~Českých Budějovicích}
+\skolnirok{2022/2023}
+\logo{\includegraphics[scale=1.25]{GJ8_logotyp}}
+
+\begin{document}
+\pagenumbering{roman}                   % číslování stránek římskými číslicemi
+	\mytitlepage						% Vygenerování titulní strany
+\addtocounter{page}{1}		% Posunutí countru stránek
+\pagenumbering{arabic}		% Číslování stránke arabskými číslicemi	
+	\prohlaseni{
+		Prohlašuji, že jsem tuto práci vypracoval samostatně s~vyznačením všech použitých pramenů.
+		}	
+	\abstrakt{Ve své maturitní práci bych se rád věnoval technologii blockchainu. V~teoretické části se zaměřím na historii této technologie. Pokusím se vysvětlit základní princip fungování blockchainu i jeho potenciál do budoucna. Náplní druhé části práce bude program napsaný v~Pythonu, který nasimuluje fungování blockchainové aplikace.
+}{
+Blockchain, Bitcoin, hash, transakce
+}
+	
+	\podekovani{
+	Děkuji všem, kdo mě podporovali a motivovali při vytváření této práce. Hlavně poté učiteli informatiky Dr.\,rer.\,nat.\,Michalu Kočerovi za odbornou pomoc a podporu. Dále bych také rád poděkoval své rodině, která mi dávala užitečné rady a průběžně kontrolovala pravopis v~celé práci.				% Poděkování
+	}
+	
+   \tableofcontents\newpage		% Obsah
+	
+
+	\chapter*{Úvod}{
+Již od vzniku Bitcoinu v~roce 2008 se na nás valí lavina zpráv ohledně kryptoměn. Každým rokem se dozvídáme o~nových podvodech, ale i o~zaručených metodách jak na kryptoměnách zbohatnout. Spoustu těchto zpráv vyvolává strach a skepsi z~nových technologií.
+
+Ve své práci bych proto chtěl poukázat na blockchain jakožto technologii, která stojí za vznikem kryptoměn a která s~podvody nemá nic společného. Pokusím se čtenáře seznámit i s~historií a vývojem blockchainu dávno před vznikem Bitcoinu. Nebude chybět ani využití blockchainu v~různých odvětvích průmyslu. 
+
+Praktickou část práce věnuji vývoji aplikace založené na blockchainu. Bude se jednat o~jednoduchý zápisník, který čtenáři představí použití blockchainu v~praxi. Program bude napsán v~programovacím jazyce Python. Pro pochopení programu však nebude nutné umět Python používat.
+}
+	\part{Blockchain a jeho využití}
+		\chapter{Technologie blockchainu}
+		\section{Název}{
+Když chceme někomu poslat zprávu, otevřeme aplikaci k~tomu určenou a necháme aplikaci text odeslat. Velmi podobně to funguje i s~posíláním peněz. Nejdříve se připojíme k~bance, zadáme částku a necháme banku, aby transakci uskutečnila. Tady však nastává problém. Komunikace mezi dvěma uživateli vyžaduje přítomnost obecně uznávané třetí strany, která naše požadavky vyhodnotí. Musíme tedy svou důvěru vkládat do prostředníka, který zprostředkuje komunikaci nás s~jiným uživatelem. Právě touto problematikou se zabývá blockchain.
+
+Blockchain slouží jakožto jeden velký veřejný seznam, do kterého se ukládají uskutečněné transakce. K~tomuto seznamu mají přístup všichni uživatelé, kteří jsou do blockchainové sítě připojeni. Na rozdíl od běžných systémů nemá nad blockchainem absolutní moc vývojář nebo správce. Blockchain je totiž uložen na uzlech (počítačích) všech uživatelů blockchainové sítě. Každý uživatel tudíž vlastní kopii blockchainu, ke které ovšem neexistuje originál. Na chodu sítě se tak podílejí všichni uživatelé. Celá blockchainová síť ve výsledku tvoří decentralizovaný systém. \cite{Antonopoulos2017}
+
+\begin{figure}[h]
+\caption{Rozdíl mezi centralizovaným a decentralizovaným systémem \cite{Kes2014}}
+\includegraphics[scale=0.20]{Decentralizace}	
+\centering
+\label{Decentralizace}
+\end{figure}	
+
+Název blockchain vznikl ze spojení anglických slov block a chain. To do češtiny můžeme přeložit jakožto řetězec bloků. Jednotlivé transakce (záznamy) jsou ukládány do bloků. Bloky jsou následně řazeny za sebe, čímž tvoří řetězec. První blok v~blockchainu se nazývá \textit{genesis block} (počáteční blok). Další blok uložený do blockchainu již obsahuje hash přechozího bloku (informaci o~předchozím bloku). V~následujícím bloku je uložena informace o~předchozím bloku, která v~sobě obsahuje také informaci o~předchozím bloku, který byl uložen dříve. Takto to pokračuje dále až k~bloku, který byl uložen jako poslední. Poslední blok tedy obsahuje informace o~všech předešlých blocích až k~\textit{genesis blocku}. Právě díky tomu je jasně dané pořadí za sebou jdoucích bloků.  \cite{Stroukal2021}
+
+Struktura blockchainu tvoří velmi bezpečný systém. Kdyby chtěl někdo změnit jakoukoliv informaci v~některém z~bloků, musel by také změnit informace ve všech blocích, které jsou uloženy v~blockchainu za tímto blokem. \cite{Stroukal2021}
+}
+		\section{Node}{
+Node nebo také v~češtině uzel je jeden počítač připojený do blockchainové sítě. Všechny uzly v~síti jsou rovnocenné. To znamená, že všichni uživatelé mají stejná práva a že žádný uzel není nadřazen druhému. Rovnocennost velmi usnadňuje komunikaci mezi jednotlivými uzly. I~když jsou uzly v~blockchainu v~podstatě stejné, rozdělují se podle několika funkcí, které se starají o~bezpečnost celého systému. Existují tzv.\,\textit{full-function nodes} (plně funkční uzly) a \textit{partial nodes} (částečně fungující uzly). \textit{Full-function node} obsahuje kopii celého blockchainu. Právě díky tomu může plnit funkci zabezpečování systému pomocí metody \textit{Proof-of-Work} nebo \textit{Proof-of-Stake}. Tím se podílí na přímém přidávání jednotlivých bloků do blockchainu. \textit{Partial node} obsahuje pouze část blockchainu. Neuzavírá tedy jednotlivé bloky, ale ověřuje správnost jednotlivých transakcí v~rámci bloku.		
+\cite{Abrol2022}} \cite{introduction}
+		\section{Blok}{
+Blok je základní stavební jednotka blockchainu. Každý blok se skládá ze čtyř částí. Jedná se o~záhlaví bloku, seznam transakcí, informaci o~velikosti bloku v~bytech a informaci o~počtu transakcí. Záhlaví bloku má za účel ukládání informací o~bloku. Seznam transakcí následně obsahuje všechny data, které jsou v~bloku uloženy. Jeden blok v~blockchainu Bitcoinu obsahuje maximálně záznam o~500-ti transakcích.  \cite{Antonopoulos2017}
+}
+\subsection{Záhlaví bloku}{
+Záhlaví bloku obsahuje informaci o~verzi blockchainu, hash předchozího bloku, hash kořenu merkleova stromu, časovou známku, obtížnost uzavření bloku a nonci. Verze blockchainu ukazuje, jestli nebyl upgradován software na novější verzi. Hash předchozího bloku odkazuje na předešlý blok a vytváří s~ním imaginární spojení. Kořen Merkleova stromu je hash, který obsahuje informace o~všech transakcích uložených v~bloku. Časová známka zobrazuje čas uzavření bloku. Obtížnost uzavření bloku představuje náročnost ověření bloku pomocí metody Proof-of-Work.  Nonce slouží jako ověřovací mechanismus \textit{Proof-of-Work}. Všechny tyto informace o~záhlaví bloku jsou následně dvakrát použity jako vstup pro algoritmus SHA (secure hash algorithm). Výsledkem celého procesu je hash, který slouží jako identifikátor bloku v~blockchainu. Identifikační hash bloku se neukládá do samotného bloku. Po uložení bloku do sítě si každý uzel identifikační hash vypočítá a následně jej uloží do samostatné databáze jako součást dodatečných informací (metadat). To poté slouží k~rychlejšímu vyhledávání bloků v~systému. Jako další identifikátor bloků se používá tzv. block height (výška bloku). Block height označuje pořadí bloku v~systému. Počáteční blok má přiřazenou délku bloku 0. Každý další blok je následně ukládán jako block height předešlého bloku + 1. \textit{Block height} není však spolehlivý identifikátor, protože se může stát, že se zároveň do systému uloží více bloků, které mají poté stejný \textit{block height}. \cite{Antonopoulos2017}
+		}
+		\chapter{Historie blockchainu}
+		\section{Vývoj blockchainu}{
+Historie blockchainu sahá už do 90.\,let 20.\,století. Roku 1991 Stuart Harber a W. Scott poprvé popsali kryptograficky zabezpečený řetězec bloků. O~rok později zakomponovali do systému technologii tzv.\, \textit{Merkle trees} (merkleových stromů), díky kterým bylo možné ukládat větší množství informací do jednotlivých bloků blockchainu. \cite{Iredale2020} 
+
+V~roce 2008 se na internetu objevil článek {\it Bitcoin: A~Peer-to-Peer Electronic Cash System}, který popisuje novou kryptoměnu, Bitcoin. Autorem této práce je Satoshi Nakamoto. Ve své práci nejen vysvětluje proč je třeba reformovat bankovnictví, ale hlavně se zabývá blockchainem, na kterém je Bitcoin založen. \cite{Stroukal2021}
+
+Dalším průkopníkem ve vývoji blockchainu se stal v~roce 2013 Vitalik Buterin, který vynalezl novou kryptoměnu, Ethereum. Zatímco blockchain Bitcoinu byl zaměřen pouze na internetové platby, Ethereum umožňovalo uživatelům na svém blockchainu ukládat nejen záznamy o~transakcích, ale i spouštět programy. Postupem času se z~kryptoměny Etherea stala spíše platforma pro vývoj decentralizovaných aplikací, která podporuje uzavírání tzv. smart contracts (chytrých smluv). Tímto však vývoj blockchainu neskončil. V~roce 2015 vznikl volně přístupný blockchain od Linuxu, který si dal za úkol vylepšit komunikaci mezi jednotlivými odvětvími průmyslu. Dále také vznikaly nové blockchainy, které cílily na vylepšení rychlosti provádění transakcí a dostupnost technologie při vývoji aplikací. Mezi nejznámější patří např.\, EOS nebo NEO. \cite{Iredale2020}
+}
+		\subsection{Satoshi Nakamoto}{
+Blockchain byl sice poprvé popsán v~roce 2008, ale ani dnes nevíme, kdo za tímto vynálezem ve skutečnosti stojí. Víme jen, že používal pseudonym Satoshi Nakamoto. Na internetu o~sobě psal, že je Japonec. Jeho identita však dodnes zůstává neznámá. Postupem času se začaly objevovat spekulace, že Satoshi Nakamoto Japoncem nejspíše vůbec nebyl, protože ve svých textech používal perfektní angličtinu bez výskytu jediného japonského slova. 
+
+Zjistit pravou identitu tajemného vynálezce se vydali také novináři. Jméno Satoshi Nakamoto spojovali s~geniálními matematiky, ale i se skupinami kryptografů. Žádná z~těchto spekulací se však nepotvrdila. Poslední věc, kterou o~Nakamotovi víme je, že nedlouho po rozšíření Bitcoinu předal doménu {\it bitcoin.org} Gavinu Andresenovi. Andresen byl v~té době hlavním příznivcem celého projektu. Později se podílel na dalším vývoji Bitcoinu.\cite{Stroukal2021}
+}
+		\subsection{Budoucnost blockchainu}{
+Budoucnost blockchainu vypadá slibně. Stále více společností a vládních organizací investuje do vývoje blockchainu. Jako hlavní cíl si dávají efektivnější využití blockchainu při automatizaci technologií a lepší fungování aplikací. Předpokládá se, že se v~brzké budoucnosti dočkáme veřejného systému, ke kterému bude mít přístup téměř kdokoliv. S~rostoucím vývojem blockchainu stoupá také potřeba expertů, kteří se touto technologií zabývají. Vzniká tak i nová pracovní pozice, která by mohla v~budoucnu zaměstnávat stále více lidí. \cite{Iredale2020} 
+}
+		\chapter{Kryptografie}
+		\section{Šifrování}{
+Jelikož je blockchain veřejný seznam, každý uživatel si může zobrazit jednotlivé transakce. Aby blockchain mohl fungovat bezpečně, bylo potřeba zajistit zašifrování jednotlivých informací. Bezpečnému přenosu informací a šifrám se věnuje kryptografie. 				
+		
+Kryptografie je matematický obor, který se zabývá bezpečným přenosem informací mezi dvěma uživateli. K~zašifrování informací se používají tzv.\,jednosměrné funkce. Jednosměrná funkce je funkce, ve které lze jednoduše vypočítat z~libovolného x funkční hodnotu f(x). Zároveň je však téměř nemožné zjistit z~funkční hodnoty f(x) původní hodnotu x. \cite{Burda2013} Nejčastěji se za tímto účelem používá exponenciální funkce prvočísel nebo funkce eliptické křivky. Právě násobení funkce eliptické křivky využil i Satoshi Nakamoto v~kryptografii Bitcoinu. \cite{Antonopoulos2017}
+
+Celý systém blockchainu je založen na vzájemném šifrování a dešifrování informací pomocí tzv.\,klíčů. Každý uživatel je vlastníkem dvou klíčů, veřejného a soukromého (privátního) klíče. Oba dva klíče jsou uloženy ve virtuální peněžence uživatele (wallet). Když chce uživatel provést transakci, potřebuje znát veřejný klíč druhého uživatele, kterému informace posílá. Veřejným klíčem příjemce zašifruje odesílatel zprávu. Když si chce příjemce zprávu zobrazit, dešifruje ji svým soukromým klíčem. Ke každé transakci odesílatel přikládá svůj veřejný klíč a digitální podpis, který se vygeneruje ze soukromého klíče a je pokaždé jiný. Digitální podpis následně ověří uživatelé v~síti. Tím se zjistí, zda-li má odesílatel na transakci nárok. V~případě Bitcoinu to znamená, že uživatel provádějící transakci vlastní odesílanou částku. \cite{Antonopoulos2017}	
+		}
+		\subsection{Soukromý klíč}{
+Soukromý nebo také privátní klíč je náhodně vygenerované číslo. V~blockchainu Bitcoinu a většině dalších blockchainů je to číslo mezi 1 až  $2^{256}$. Toto číslo je natolik velké, že je téměř nemožné ho uhodnout. Soukromý klíč proto plní úlohu podobnou heslu, bez kterého uživatel nemůže provádět transakce.  Každý uživatel si soukromý klíč může vygenerovat sám bez toho, aniž by musel být připojen k~síti. K~tomu se používají certifikované generátory náhodných čísel, které jsou mnohem spolehlivější, než generátory náhodných čísel zabudované v~operačním systému každého počítače. V~dnešní době jsou soukromé klíče generovány hlavně digitálními peněženkami, které je i následně ukládají. Soukromý klíč poté slouží k~výpočtům digitálního podpisu uživatele podle algoritmu. Když uživatel soukromý klíč ztratí, přijde tím o~všechny informace o~transakcích bez jakékoliv náhrady. V~případě kryptoměn to znamená, že ztratí přístup ke své peněžence.  \cite{Antonopoulos2017}\cite{Frankenfield2022} 
+		}
+		\subsection{Veřejný klíč}{
+Veřejný klíč se počítá speciálním algoritmem ze soukromého klíče. Vychází se zde právě z~kryptografie eliptické křivky. Z~funkce eliptické křivky lze jednoduše spočítat hodnotu veřejného klíče, ale získat zpět hodnotu soukromého klíče je téměř nemožné. Nejčastěji je poté veřejný klíč uložen ve stejné digitální peněžence jako klíč soukromý. Na rozdíl však od klíče soukromého je veřejný klíč dostupný všem uživatelům sítě. Uživatel svůj veřejný klíč znát nepotřebuje, protože jej může kdykoliv vypočítat ze soukromého klíče. \cite{Antonopoulos2017}
+		\subsection{Adresa}{
+Z~veřejného klíče se vygeneruje adresa, která plní funkci čísla účtu uživatele. Každý uživatel sítě poté ostatním uživatelům posílá pouze svou adresu.
+\cite{Antonopoulos2017}
+		}
+\begin{figure}[h]
+\caption{Získávání veřejného klíče a adresy \cite{Antonopoulos2017}}
+\includegraphics[scale=0.50]{Private_Public_key}	
+\centering
+\label{Private_key}
+\end{figure}
+		}
+		\section{Hashování}{
+Jelikož blockchain slouží jako jedna velká databáze transakcí, bylo nutné vyřešit způsob ukládání dat. Všechny ukládané informace 
+		
+Hashování slouží k~zašifrování jakkoliv velké informace do informace, která má předem stanovenou velikost. K~tomu se používá hashovací funkce. Hashovací funkce je jednosměrná funkce, která ze vstupu o~libovolném počtu bitů vrací obraz s~pevně stanovenou délkou výstupu. Jako vstup hashovací funkce můžeme použít téměř cokoliv. Podmínkou je však vyjádření této hodnoty v~bitech. Pro množinu všech hodnot, které mohou být dány jako vstup hashovací funkce, existuje množina hodnot výstupu. Ke každé hodnotě vstupu hashovací funkce je přiřazena právě jedna hodnota z~množiny výstupů. Pouze malá změna vstupu vyvolá velkou změnu ve výstupu. Je tedy v~podstatě nemožné provést funkci opačným směrem. Výsledkem hashovací funkce je binární posloupnost, která se nazývá hash. Hash má vždy pevně daný počet bitů. Nejčastěji to bývá velikost mezi 128 až 512 bity. To záleží na typu hashovací funkce.\cite{Burda2013}
+
+Jelikož je množina vstupů mnohem větší než množina výstupů, může dojít k~tzv.\,kolizi. Kolize nastane tehdy, když je ke dvěma různým hodnotám vstupu přiřazen stejný hash. Čím větší je velikost hashe v~bitech, tím existuje větší počet kombinací, kterými může být hash sestaven. V~dnešní době se používají takové hashovací funkce, které minimalizují výskyt kolizí. Nejčastěji používanou hashovací funkcí je SHA (\textit{Secure Hash Algorithm}). Právě SHA používá i blockchain Bitcoinu.\cite{Burda2013}
+}
+		\subsection{SHA}{
+Zkratka SHA znamená v~angličtině \textit{secure hash algorithm}. To do češtiny přeložíme jako zabezpečený algoritmus pro počítání hashe. V~dnešní době existují tři verze SHA. Jsou to SHA-1, SHA-2 a SHA-3. Každý z~těchto algoritmů je trochu jiný. SHA-1 vznikl již v~90.\,letech 20.\,století. Stále je však používaný, i když již není bezpečný. Nejpoužívanějším algoritmem je momentálně SHA-2, který je stále velmi bezpečný. SHA-3 se postupně začíná používat. Stále je však ve vývoji. Za zkratku SHA se píše délka výstupu v~bitech. Může to tedy být např. SHA-256 verze 2, kterou používá mimo jiné i blockchain Bitcoinu.  \cite{Burda2013} \cite{Antonopoulos2017}
+}
+		\subsection{Merkleův strom (Hashový strom)}{	
+Aby všichni uživatelé nemuseli mít na svých počítačích uložen celý blockchain, je do bloků místo seznamů transakcí ukládán tzv. Merkleův strom.		
+
+Merkleův nebo také Hashový strom byl vynalezen v~roce 1987 Ralphem Merklem. Merkle jako první ve své práci představil nenáročný systém ověřování informací. Každou informaci rozdělil do větví pomyslného stromu. Vždy dvě větve se postupně sbíhají do té doby, než se spojí do jednoho bodu. Informace, které jsou v~Merkleově stromu uloženy, se nazývají listy stromu. Z~jednotlivých listů (informací) se vytvoří dvojice, které jsou následně zahashovány. Když je počet listů lichý, jedna transakce se zkopíruje, aby byl počet všech informací sudý. Hashem listů vzniknou větve stromu. Poté se i z~větví (zahashovaných informací) vytvoří dvojice, které jsou znovu vloženy jako vstup hashovací funkce. Celý proces se opakuje do té doby, než jsou všechny větve spojeny do jednoho hashe. Výsledný hash se nazývá \textit{Merkle root} (kořen Merkleova stromu). \cite{Frankenfield2021}
+
+V~blockchainu je vyžití Merkleových stromů velmi užitečné při ověřování jednotlivých transakcí. Nepotřebujeme totiž znát celý blockchain, ale stačí nám znát pouze záhlaví bloků, které obsahuje hash kořenu Merkleova stromu. Když poté něco neodpovídá v~jedné transakci, výsledný hash Merkleova stromu bude také jiný. K~nalezení chybné transakce stačí, když od ostatních uzlů v~systému, které mají přístup k~celému blockchainu, získáme dva předchozí hashe stromu. Následně porovnáme správnost obou hashů a zjistíme, ve které části větve je chyba. Celý proces se pak opakuje až do nalezení chybné transakce. \cite{Frankenfield2021} \cite{Nakamoto2008} 
+		}
+
+\begin{figure}[h]
+\caption{Schéma Merkleova stromu \cite{Antonopoulos2017}}
+\includegraphics[scale=0.60]{Merkle_tree}	
+\centering
+\label{Merkle_tree}
+\end{figure}
+
+		\chapter{Transakce}
+		\section{Ověřování transakcí}{
+Nejdůležitější částí blockchainu jsou transakce. V~blockchainu Bitcoinu jsou hlavním obsahem transakce tokeny digitální měny. U~jiných blockchainů to však může být i text. Nastává zde však problém s~ukládáním těchto informací. Bylo proto potřeba vymyslet fungující transakční mechanismus. Pro blockchain byl vymyšlen systém tzv.\,UTXO.
+
+UTXO neboli \textit{unspent transakcion outputs} jsou záznamy o~transakcích v~blockchainu, které nebyly utraceny. Každá UTXO transakce obsahuje svého odesílatele a příjemce. Příjemce je ten, kterému nyní patří tokeny dané kryptoměny, které byly odeslány. V~blockchainu je tedy jasně uvedeno, kdo je příjemcem a kolik tokenů mu bylo připočteno. Když pak chce tento uživatel provést transakci, mechanismus blockchainu vyhledá jeden nebo více UTXO záznamů (to záleží na množství odesílaných tokenů), jejichž hodnoty následně nastaví jako utracené. Následně se vytvoří nový UTXO záznam, který do sebe uloží přeplatek tokenů (vrátí peníze). 
+ 
+Aby systém transakcí mohl fungovat, je potřeba zajistit jeho bezpečnost. Blockchain je založen na peer-to-peer síti. Systém tedy neobsahuje třetí stranu, která by transakce ověřovala. Na schvalování transakcí se proto podílí celý systém. K~uznání transakce za platnou je potřeba její schválení určitým počtem uzlů v~síti. Jednotlivé uzly porovnávají informace obsažené v~transakci s~veřejným klíčem uživatele pomocí digitálního podpisu. Jednoduše tak ověří, jestli měl uživatel na tuto transakci nárok. Když je vytvářen blok, do kterého se ukládají jednotlivé transakce, jako první se vytvoří tzv.\,\textit{coinbase} transakce. 
+
+Coinbase je transakce, která obsahuje odměnu pro těžaře, který tento blok uzavře. Společně s~odměnou jsou v~coinbase transakci uloženy také poplatky za všechny transakce uložené v~bloku, které se následně přidají k~odměně pro těžaře. Po schválení jednotlivých transakcí a informací v~bloku je blok přidán do sítě. \cite{Bashir2018}\cite{Antonopoulos2017}
+		}
+\begin{figure}[h]
+\caption{Schéma ověřování transakce \cite{Nakamoto2008}}
+\includegraphics[scale=0.60]{Pridavani_bloku}	
+\centering
+\label{Pridavani_bloku}
+\end{figure}
+		\section{Digitální podpis}{
+Digitální podpis je používán k~ověřování transakcí jednotlivými uzly. Aby mohla být transakce schválena, musí uživatel předložit dostatečně přesvědčivé informace o~nároku na transakci. Každý uživatel sítě proto vlastní soukromý klíč. Ze soukromého klíče se pomocí algoritmu vygeneruje digitální podpis, který slouží jako důkaz vlastnictví soukromého klíče bez toho, aniž by byl soukromý klíč odhalen. Pro ověřování transakcí se následně použije algoritmus, který umožní uživatelům porovnat pravost digitálního podpisu s~údaji zahrnutými v~transakci. \cite{Antonopoulos2017}
+
+Pro získání digitálního podpisu se často používá ECDSA, \textit{Eliptic Curve Digital Signature Algorithm}, to v~češtině znamená algoritmus digitálního podpisu eliptickou křivkou. Tento algoritmus používá i blockchain Bitcoinu. Jako vstup algoritmu je vložen hash kopie transakce (nebo její části) a uživatelův soukromý klíč. Z~výstupu poté získáme samotný digitální podpis, který obsahuje zašifrovaný soukromý klíč. \cite{Antonopoulos2017} Některé blockchainy pro generování digitálního podpisu používají RSA algoritmus. Velkou nevýhodou RSA algoritmu je však to, že ukládá mnohem větší množství dat než ECDSA, i když je téměř stejně bezpečný. \cite{Bashir2018}
+
+K~ověření správnosti digitálního podpisu slouží ověřovací algoritmus digitálního podpisu. Do vstupu algoritmu je vložen digitální podpis, prováděná transakce a veřejný klíč odesílatele. Když všechny hodnoty odpovídají skutečnosti, je transakce (nebo její část) schválena. Výstupem algoritmu je tedy \textit{True}. \cite{Antonopoulos2017}
+
+Po schválení transakce uzlem je k~transakci připojen tzv.\,\textit{SIGHASH flag}. Transakce je schválena za platnou, obsahuje-li těchto vlaječek dostatečné množství od dalších uzlů v~síti. \cite{Antonopoulos2017}
+}
+		\section{Uzavírání bloku}{
+Blockchain je založen na tzv.\, decentralizovaném konsenzuálním mechanismu. To znamená, že se na ověření transakce a následném uzavření bloku musí shodnout většina sítě, protože neexistuje žádná třetí strana. Na uzavírání bloků se tak může podílet kdokoliv. 
+
+Uživatel sítě, který chce mít možnost uzavřít blok, musí nejdříve vytvořit návrh bloku. Návrh připraví tím, že do prázdného bloku vloží záhlaví bloku, které obsahuje všechny důležité informace o~bloku, a seznam transakcí. Následně se může pokusit block uzavřít pomocí metody Proof-of-Work nebo Proof-of-Stake. To záleží na typu blockchainu. Blockchain Bitcoinu používá k~uzavírání bloků metodu Proof-of-Work. Blockchain Etherea byl až do srpna 2022 založen na Proof-of-Work. V~létě 2022 však úspěšně přešel na metodu Proof-of-Stake. \cite{Antonopoulos2017}\cite{Weston2021}
+		}
+\begin{figure}[h]
+\caption{Hash záhlaví bloku}
+\includegraphics[scale=0.60]{Pridavani_bloku}	
+\centering
+\label{Pridavani_bloku}
+\end{figure}
+		\subsection{Proof-of-Work}{
+Proof-of-Work znamená v~překladu ověření prací. K~uzavírání bloků se používá výpočetní technika tzv.\,těžařů. Těžaři jsou uživatelé sítě, kteří se přímo podílí na přidávání bloků do blockchainu. Když chce těžař uzavřít blok, nejprve připraví návrh bloku, který obsahuje záhlaví bloku a seznam transakcí. V~záhlaví bloku prozatím nastaví nonci na 0. Poté vloží všechny informace v~záhlaví bloku jako vstup pro hashovací funkci. Tím získá výsledný hash bloku. K~určení obtížnosti uzavření bloku slouží target. \cite{Antonopoulos2017}
+
+Target je číslo založené na pravděpodobnosti obtížnosti uzavření bloku. V~blockchainu Bitcoinu má target účelem nastatvit svou hodnotu na takovou velikost, aby přibližná doba uzavření bloku činila 10 minut. To znamená, že výpočetní technika těžařů by měla v~průměru uzavřít blok každých 10 minut. Rychlost uzavírání bloků závisí na rychlosti výpočetní techniky, proto se čas uzavírání bloků mění. Pokaždé, když je uzavřeno 2016 bloků, se hodnota targetu nastaví tak, aby se čas uzavření jednoho bloku přiblížil právě 10-ti minutám. Jeho velikost se vypočítá z~průměrného času uzavření všech 2016 bloků, ke kterému se přidá nebo se od něj ubere hodnota, jež tuto podmínku splňuje. Pro uzavření bloku potřebuje těžař najít takové číslo, jaké po přidání k~hashi bloku a následném zahashování obou čísel, vrátí hodnotu menší než má target. Hledanému číslu se říká nonce. \cite{Antonopoulos2017}
+
+Jediným způsobem, jakým lze nonci najít, je vyzkoušet dosadit do hashovací funkce co nejvíce hodnot. V~tuto chvíli přichází na řadu výpočetní technika. Program ve výpočetní technice začne zkoušet různé kombinace čísel. Nejčastěji je to velmi rychlé přičítání jedničky k~předchozí hodnotě, do té doby, než je nonce nalezena. Výpočetní technika vyzkouší za 10 minut i trilióny hodnot. Když uživatel nalezne nonci, která je menší než target, odešle ji všem uživatelům sítě ke kontrole. Ti následně nonci ověří tím, že ji zadají společně s~hashem záhlaví bloku jako vstup hashovací funkce a zkontrolují, jestli je její hodnota opravdu menší než target. Pokud je nonce správná a všechny hodnoty v~bloku odpovídají skutečnosti, je blok přidán do blokchainu. Těžař, který jako první správnou nonci objevil, dostává odměnu. V~případě Bitcoinu jsou to poplatky za transakce a nově vytěžené Bitcoiny. Po uzavření bloku začíná celý proces nanovo. \cite{Antonopoulos2017}
+
+Velkou nevýhodou metody Proof-of-Work je velká spotřeba elektrické energie. Aby bylo výhodné těžit bloky, musí být výpočetní technika neustále v~provozu. \cite{Weston2021}
+		}
+		\subsection{Proof-of-Stake}{
+Proof-of-Stake po přeložení do češtiny znamená ověření vkladem. Tento způsob ověřování je znám také pod názvem digitální těžba. Jediné, co uživatel k~uzavírán bloků potřebuje, jsou tokeny dané kryptoměny. Když chce uživatel uzavírat bloky, musí prokázat síti, že vlastní předem stanovené minimální množství tokenů. Tyto tokeny jsou následně dány do zástavy. Tím se uživatel přihlásí k~možnosti uzavírat bloky. Pokaždé, když je potřeba zavřít nový blok, systém náhodně vybere jednoho uživatele, který má v~zástavě dostatečný počet tokenů. Záleží zde na množství. Čím větší počet tokenů uživatel vlastní, tím větší má šanci, že bude vybrán k~uzavření bloku. Poté, co je uživatel zvolen, připraví blok k~uzavření. Do bloku tedy vloží záhlaví a seznam transakcí. Následně je blok poslán k~ověření ostatním uzlům sítě. Když se většina sítě shodne na správnosti informací v~bloku, je blok zařazen do blockchainu. Některé blockchainy ještě před ověřováním správnosti rozdělí blok na několik částí. Např.\, u~blockchainu Etherea je blok rozdělen na 64 částí. Tyto jednotlivé části jsou následně odeslány ke kontrole. Když jsou všechny části bloku ověřeny, uživatel dostává odměnu. Odměnou jsou tokeny kryptoměny. Když jsou však informace v~bloku nesprávné, uživatel uzavírající blok je potrestán. Přichází o~vklad, který předem vložil do sítě.	\cite{Weston2021}
+
+Velkou výhodou ověřování pomocí Proof-of-Stake je, že celý systém funguje jednoduše. Je totiž naprosto nezávislý na vnějších faktorech, jakými je u~Proof-of-Work elektrická energie a její cena. Celý systém díky své jednoduchosti dokáže pracovat velmi rychle. To se projevuje na rychlosti a množství uzavíraných transakcí. Problémem však je, že tato metoda uzavírání bloků není stále prověřená časem. První kryptoměnou, která představila koncept Proof-of-Stake se stal v~roce 2012 Peercoin. Neví se však, zda neexistuje cesta, kterou by se tento mechanismus dal obejít. \cite{Weston2021} \cite{Bashir2018}
+		}
+		\subsection{Fork}{
+V~blockchainu založeném na Proof-of-Work je občas uzavřeno více bloků ve stejný čas. Jelikož každý uzel vlastní kopii blockchainu, může se stát, že různé uzly při schvalování uloží odlišné bloky. Blockchain se díky tomu rozdělí na několik částí. Právě rozdělení blockchainu se říká \textit{fork}. Aby blockchain mohl znovu fungovat jako řetězec po sobě jdoucích bloků, je potřeba zjistit jeho hlavní větev, do které se budou ukládat další bloky. Každý uzel v~síti proto rozhoduje, kterou část bude považovat jako tu hlavní. K~určení hlavní větve se používá porovnávání práce, kterou bylo nutné vykonat k~uzavření jednotlivých bloků. Blok, který bylo energeticky náročnější uzavřít, je považován za součást hlavní větve. Pouze bloky uložené v~hlavní větvi blockchainu jsou schváleny celou sítí. \cite{Antonopoulos2017}
+
+Speciálním případem rozdělení blockchainu je tzv.\,\textit{hard fork}. Hard fork slouží k~permanentnímu rozdělení blockchainu na dvě nezávislé části. Po rozdělení jsou schváleny obě větve, které fungují samostatně. Z~existujícího blockchainu tedy může vzniknout nový blockchain, který funguje na trochu jiném principu. Z~blockchainu Bitcoinu se takto oddělila v~roce 2021 např.\,kryptoměna Bitcoin Cash.  \cite{Antonopoulos2017}\cite{Peters2021}
+
+Existuje také \textit{soft fork}. Soft fork slouží k~přechodu blockchainu na novou verzi. Na rozdíl od hard forku zde nedochází k~rozdělení blockcahinu na dvě části. Soft fork se tedy používá jen k~drobným úpravám systému, při kterých platí původní pravidla schvalování transakcí. \cite{Antonopoulos2017}
+}
+		\chapter{Bezpečnost}
+		\section{Root of trust}{
+Většina bezpečnostních systémů je založena na architektuře tzv.\,\textit{root of trust} (kořen důvěry). \textit{Root of trust} slouží jako základ bezpečnostního systému, ke kterému jsou následně připojeny jednotlivé bezpečnostní prvky. Tím vznikají vrstvy. Když systém obsahuje velké množství vrstev, je větší šance, že se zde vyskytne chyba, která následně povede k~prolomení obrany systému. V~blockchainu je za \textit{root of trust} považován \textit{genesis block} (počáteční blok), ke kterému se postupně přidávají další bloky. Blockchain tedy není tvořen dalšími vrstvami, které by mohly potenciálně sloužit jako bezpečnostní hrozba.\cite{Antonopoulos2017}
+		\section{Útok 51}{
+I~když je blockchain velmi bezpečný, existuje několik způsobů, kterými lze systém obejít. Nejvýznamnější hrozbou pro blockchainovou síť založenou na Proof-of-Work je útok 51. Jelikož blockchain funguje jako decentralizovaný systém, všichni uživatelé se podílí na chodu a bezpečnosti celého systému. Ke správnému fungování blockchainu je potřeba nejméně 51\% výkonu celé sítě. Když chce tedy útočník ovládat celý systém, musí mít k~dispozici výkonnější výpočetní techniku než má zbytek sítě dohromady. V~případě, že se útočníkovi podaří získat tuto převahu, je schopen uzavírat bloky ve svůj prospěch. Systém poté nedokáže objektivně schvalovat transakce a je zcela závislý na útočníkovi. Útočník nebo skupina útočníků je poté schopna provádět dvojité transakce. Dvojitá transakce znamená, že uživatel může provést stejnou transakci dvakrát. V~případě kryptoměn by útočník mohl např.\, zaplatit znovu stejnými digitálními penězi, které již měly být utraceny. \cite{Prusty2017}\cite{Antonopoulos2017}
+}
+		\chapter{Využití blockchainu}
+		\section{Kryptoměny}
+		\subsection{Historie kryptoměn}{
+Kryptoměny jsou digitální peníze založené na technologii blockchainu, které se dají obchodovat na kryptoměnových burzách. Na rozdíl od běžných peněz existují pouze v~digitální podobě. Již od začátku vývoje kryptoměn bylo hlavním tématem soukromí a anonymita uživatelů. Kryptoměny měly být peníze, které by nepodléhaly kontrole žádné instituce nebo státu. Aby mohly fungovat jako platidlo, bylo potřeba zajistit jejich bezpečné používání. K~tomu posloužil blockchain. S~prvními kryptoměnami se setkáváme ještě před vynalezením Bitcoinu. 
+
+V~roce 1987 přišel americký kryptograf David Chaum s~nápadem vytvořit elektronické peníze. V~roce 1990 spustila jeho společnost DigiCash první kryptoměnu eCash. Společnost DigiCash zbankrotovala o~šest let později a tím skončil i vývoj eCash. V~průběhu 90.\,let se objevilo mnoho pokusů o~vytvoření použitelné kryptoměny. Vznikly kryptoměny jako např.\,E-Gold nebo Bit Gold. Žádná z~těchto kryptoměn však nebyla plně funkční. Zajímavějšími projekty se staly kryptoměny B-Money a Hashcash, které posloužily jako předloha pro vývoj Bitcoinu. Všechny tyto kryptoměny však nikdy nebyly zprovozněny do takové míry, aby mohli být používány ve větším měřítku. \cite{Reiff2022}
+		}
+		\subsection{Bitcoin}{
+Bitcoin byl vynalezen v~roce 2008 Satoshi Nakamotem. Jako kryptoměna byl spuštěn o~rok později. V~porovnání s~běžnými penězi Bitcoin fungoval velmi podobně. Bylo ho možné prodávat, nakupovat, směňovat za komodity nebo také vyměnit za běžné peníze. Oproti běžným penězům má však Bitcoin předem stanovený počet všech Bitcoinů v~oběhu. Bitcoin se tedy nedá vytisknout, jak je to možné u~běžných peněz. V~roce 2140 se počet Bitcoinů zastaví na téměř 21 milionech tokenů. To činí z~Bitcoinu deflační měnu. Nakamoto použil při vývoji Bitcoinu poznatky z~neúspěšných pokusů o~vytvoření kryptoměn, které následně zakomponoval do svého vynálezu. Bitcoin je založen na mechanismu \textit{Proof-of-Work}. K~ukládání bloků do blockchainu tedy slouží výpočetní technika uživatelů. Při úspěšném uložení bloku je vytvořena samostatná transakce, která obsahuje Bitcoiny jako odměnu pro těžaře.  \cite{Antonopoulos2017}\cite{Nakamoto2008}
+
+První transakci zapsanou do blockchainu provedl sám Nakamoto. Několik dní po vytvoření \textit{genesis} bloku odeslal 10 BTC vývojáři Halu Finneymu. V~květnu roku 2010 byl poprvé proveden nákup za Bitcoiny. Programátor Laszlo totiž koupil dvě pizzy za 10 000 BTC. To způsobilo nový příliv uživatelů. V~roce 2011 se o~Bitcoinu dozvěděla širší veřejnost prostřednictvím medií, které se začaly o~Bitcoin zajímat. \cite{Stroukal2021} 
+}
+		\subsection{Altcoiny}{
+Bitcion byl inspirací pro mnoho programátorů. Několik z~nich se dokonce rozhodlo vytvořit svou vlastní kryptoměnu. Kryptoměny, které byly vytvořeny po roce 2008, tedy po vynálezu Bitcoinu, se nazývají altcoiny. Zkratka altcoin vznikla z~dvouslovného \textit{alternative coin}. 
+
+Altcoiny vznikají různými způsoby. Velké množství altcoinů vzniklo oddělením (\textit{forkem}) od Bitcoinu nebo později od Etherea. Příkladem kryptoměn, které se oddělily od blockchainu Bitcoinu jsou Bitcoin Cash nebo Litecoin. Existují však také altcoiny založené na svém vlastním blockchainu. Nejznámější kryptoměnou, která operuje na vlastním blockchainu, je již zmíněné Ethereum.
+
+Altcoiny by se daly rozdělit do několika kategorií podle využití. Některé kryptoměny existují pouze jako peníze určené k~platbě. Dalším typem jsou tzv.\,\textit{stablecoins}. 
+
+\textit{Stablecoiny} jsou kryptoměny, které jsou používány jako udržitelé hodnoty. Nejčastěji se jejich cena odvíjí od méně volatilních komodit, kterými jsou např.\,drahé kovy, jiné kryptoměny nebo fiat měny. Příkladem \textit{stablecoinu} je Tether, který kopíruje cenu amerického dolaru. 
+
+Altcoiny mohou sloužit také jako investiční tokeny. Ke každému tokenu je možné přiřadit prakticky jakákoliv hodnota. Mohou to být např.\, nemovitosti nebo akcie. Jedním z~nejznámějších tokenů, který se zabývá obchodováním akcií je Algorand.
+
+Jako vlastní typ kryptoměn je možné považovat i tzv.\,\textit{Memecoins}. \textit{Memecoiny} jsou altcoiny, které vznikly pouze z~recese a nemají tudíž žádnou speciální funkci. Nejslavnějšími \textit{memecoiny} jsou Dogecoin nebo Shiba Inu.
+
+Posledním typem altcoinů jsou \textit{utility tokens} neboli užitečné tokeny. \textit{Utility tokens} poskytují služby na své síti. Uživatelé tedy mohou na sítích \textit{utility} tokenů ku příkladu spouštět své vlastní programy. Tímto typem altcoinu je i druhá nejznámější kryptoměna, a to Ethereum.
+\cite{FrankenfieldALT}
+}
+		\subsection{Ethereum}{
+Vynálezcem Etherea je programátor Vitalik Buterin. Buterin byl velkým příznivcem Bitcoinu, na který také navázal. Ethereum vzniklo za účelem vytvoření bezpečné sítě pro přenos dat. Tokenem Etherea se stala měna Ether, která slouží jako platidlo pro využívání Ethereového blockchainu. Primárním cílem tohoto projektu bylo vytvoření systému, který by sloužil jako jeden velký počítač. Na tomto počítači by poté mohly být spuštěny programy nazývané \textit{smart contracts}. Jelikož Ethereum umožňuje spouštět programy na svém blockchainu, bylo nutné zajistit, aby nedocházelo ke zneužívání a tím pádem i zahlcení sítě. Proto vznikla stupnice, která měří náročnost spuštění jednotlivých programů.  Stupněm této škály je měna \textit{gas} (palivo). Aby uživatel mohl spustit svůj program na ethereovém blockchainu, musí zaplatit předem určeným množstvím paliva. Množství potřebného paliva se odví od obtížnosti spuštění programu. Palivo si uživatel může nakoupit právě za již zmíněné Ethery.
+
+Původně byl blockchain Etherea založen na Proof-of-Work. V~srpnu roku 2022 však přešlo Ethereum úspěšně na Proof-of-Stake. \cite{Antonopoulos2019}	
+}
+		\section{Decentralizované aplikace}{
+Decentralizované aplikace nebo také \textit{dApps} jsou síťové aplikace, které jsou založeny na \textit{Peer-to-Peer} systému. Aplikace tedy nepodléhají kontrole třetí strany. Pro zaznamenávání dat je často používán blockchain právě kvůli zachování větší míry svobody. \cite{Frankenfield2023}
+
+Decentralizované aplikace jsou užívány hlavně k~přímému přenosu dat mezi uživateli. Mohou to být např.\,finanční služby. Aplikace vytvoří spojení mezi dvěma uživateli, kteří si mezi sebou na přímo posílají peníze. Dále jsou decentralizované aplikace používány jako databáze pro bezpečné uchovávání a ověřování identity uživatelů. Jedním z~příkladů je zdravotnictví, ve kterém je potřeba bezpečně ukládat informace o~zdravotním stavu pacientů. Decentralizované aplikace mohou být dále použity i ve vzdělávání nebo jako sociální sítě. \cite{Frankenfield2023}
+
+Nevýhodou decentralizovaných aplikací je neschopnost jakkoliv moderovat obsah v~případě, že by uživatelé mohli veřejně sdílet informace. Další problém je spojený s~vnitřním vývojem aplikace. Obtížné by bylo např.\,aplikaci aktualizovat.
+
+Z~důvodu jednoduchého vývoje je většina decentralizovaných aplikací vytvářena na ethereové síti.
+\cite{Frankenfield2023}
+}
+ 		\section{NFT}{
+NFT neboli \textit{non fungable token} je digitální token, který je uložen v~blockchainu. Na rozdíl od kryptoměn je však nezaměnitelný. K~tokenu je tedy vždy uveden majitel. Tím pádem je jasně určen i originál záznamu uloženého jako NFT. 
+
+NFT je jakýkoliv digitální záznam uložený v~blockchainu. Může to být např.\,fotografie, video, umělecké dílo atd. Aby se uživatel mohl stát vlastníkem NFT, musí si nejdříve ho koupit na NFT burze. K~nákupu NFT je nejčastěji používána měna Ether. Když je poté NFT zakoupeno, je záznam o~vlastnictví uložen do ethereového blockchainu.
+\cite{Sharma2023}
+ 		}
+	\part{Blockchainová aplikace}
+	\chapter{Vytvoření aplikace}{
+K~vytvoření blockchainové aplikace je potřeba nejprve určit, jaký bude její hlavní účel. Musíme také vědět, pro koho bude tato aplikace určena. Struktura blockchainové aplikace je založena na decentralizaci. K~tomu, aby mohla blockchainová síť pracovat nezávisle na třetí straně, potřebujeme velké množství uživatelů. To však v~našem případě nebude možné zajistit. Musíme tedy vytvořit aplikaci, která bude blockchainovou síť pouze simulovat. 
+
+Nejdříve umožníme uživatelům se do aplikace přihlásit. Po přihlášení budeme chtít zobrazit menu, které uživateli zobrazí možnosti k~ovládání aplikace. Hlavní funkcí bude ukládání bloků do blockchainu. Uživatel také bude mít možnost odeslat transakci, zobrazit blockchain a ukončit aplikaci. Jelikož aplikaci ovládá pouze jeden uživatel, není možné, aby uzavírání bloku a transakce ověřovali ostatní uživatelé. Jako transakci tedy budeme považovat pouze textovou zprávu, kterou uživatel zadá a následně uloží do blockchainu. Uzavírání bloku bude sloužit pouze jako simulace použití \textit{PoW}. Samotné uložení zprávy do blockchainu bude nahrazovat odměnu za uzavření bloku. 
+
+Výsledkem bude aplikace, která slouží jako zápisník. Jeden blok v~blockchainu bude symbolizovat jednu stránku v~zápisníku. Do zápisníku bude možné ukládat zprávy a následně je i zpětně zobrazit. Když si bude chtít uživatel zprávu přečíst, dozví se také čas uložení bloku a jméno uživatele, který blok uložil. 
+}
+	\chapter{Ukládání dat}{
+	\section{Vytvoření databáze}
+Pro vytvoření blockchainu je potřeba nejdříve vytvořit databázi, do které se budou ukládat data. K~vytvoření databáze můžeme použít SQLite3 modul v~Pythonu založený na SQL \textit{(structured querry language)}. Jako první je třeba definovat třídu, která bude komunikovat s~databází blockchainu. Následně definujeme funkci pro vytvoření databáze. Pro naše účely vytvoříme čtyři tabulky, které budou ukládat jednotlivé části bloků. Jako první vytvoříme tabulku záhlaví. Záhlaví slouží k~ukládání informací o~bloku. Další tabulkou je tabulka pro ukládání všech transakcí (záznamů), které byly do bloku uloženy. Poté přidáme také tabulku, která obsahuje velikost bloku v~bytech. Poslední tabulka poté bude sloužit pro ukládání informace o~počtu transakcí.
+}
+\begin{lstlisting} 
+class Blockchain_databaze(object):
+    def __init__(self, dbblockchain, id_uzivatele):
+        self.dbblockchain = dbblockchain
+        self.id_uzivatele = id_uzivatele
+        self.ident, self.uzivatel = self.id_uzivatele
+    def vytvoreni_blockchainu(self):
+        """
+        vytvori databazi pro blockchain
+        """
+            # vytvorime databazi blockchainu v~pripade ze neexistuje
+        query = ('''CREATE TABLE IF NOT EXISTS zahlavi
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                verze NOT NULL,
+                                predchozi_hash,
+                                merkle_hash,
+                                timestamp INTEGER NOT NULL,
+                                target NOT NULL,
+                                nonce NOT NULL
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS transakce
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                seznam_transakci
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS velikost
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                velikost_bloku INTEGER NOT NULL
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS pocet
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                pocet_transakci NOT NULL
+                            );''')
+        self.sql(query)
+\end{lstlisting}
+
+Aby mohla aplikace pracovat správně, je potřeba oddělit záznamy jednotlivých uživatelů. K~tomu nám poslouží třída \textit{Wallet}, která bude pracovat s~databází uživatelů. Do této databáze vložíme tabulku pro ukládání uživatelských jmen a zahashovaných hodnot hesel.
+\begin{lstlisting}
+class Wallet():
+    def __init__(self, dbwallet):
+        self.dbfile = dbwallet
+        self.conn = sqlite3.connect(dbwallet)
+        self.cur = self.conn.cursor()
+        # vytvoříme databazi blockchainu v~případe ze neexistuje
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS wallet
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            jmeno NOT NULL,
+                            heslo NOT NULL
+                        );''')
+\end{lstlisting} 
+	\section{Komunikace s~databází}{
+Abychom mohli s~databází komunikovat, potřebujeme nejdříve vytvořit spojení. V~našem případě si připojení k~databázi uložíme do proměnné \textit{cursor}. K~vyhodnocování požadavků nám poslouží jednoduchá funkce, která zjistí, jestli chceme z~databáze data získat a nebo je do ní uložit. V~obou případech však nejdříve musíme zadat dotaz v~SQL, který následně funkce vyhodnotí.
+\begin{lstlisting}
+conn = sqlite3.connect(self.dbblockchain)
+cursor = conn.cursor() 
+if data == None:
+	cursor.execute(dotaz)
+else:
+     cursor.execute(dotaz,data)
+conn.commit() # potvrzení změn	
+\end{lstlisting}
+	}
+	\chapter{Uživatel}{
+Jak již bylo zmíněno, blockchain je otevřený seznam transakcí. Pro jeho simulaci je potřeba vytvořit takový systém, který bude dostupný všem. Aby mohla být aplikace bezpečná a zároveň přístupná komukoliv, musíme vytvořit funkci pro přidávání nových uživatelů. 
+
+Nejdříve vytvoříme nekonečnou smyčku, která poběží do nekonečna. Následně program uživatele požádá o~zadání nového uživatelského jména. Poté se funkce spojí s~databází a zkontroluje, jestli toto uživatelské jméno již neexistuje. Pokud je nové uživatelské jméno unikátní, uživatel zadá heslo. Aplikace poté zahashuje hodnotu hesla pomocí hashovací funkce SHA-256 a uloží ji společně s~uživatelským jménem do databáze.
+\begin{lstlisting} 
+    def novy_uzivatel(self):
+        """
+        vytvoří profil nového uživatele
+        """
+        while True:
+            jmeno = input("Zadejte uživatelské jméno: ")
+            query = "SELECT jmeno FROM wallet"
+            overeni = self.nahrat(query).fetchall()
+            jmena = []
+            for prvek in overeni:
+                prvek = prvek[0]
+                jmena.append(prvek)
+            if jmeno not in jmena:
+                heslo = getpass.getpass("Zadejte heslo: ")
+                heslo = hashlib.sha256(heslo.encode())
+                heslo = heslo.hexdigest()
+                data = jmeno, heslo
+                self.insert_wallet(data)
+                break
+            else:
+                print("Toto uživatelské jméno již existuje")
+        return 
+\end{lstlisting} 
+
+Když už máme připravenou databázi uživatelů, potřebujeme také zajistit přihlašování do aplikace. K~tomu nám poslouží nová funkce. Nejprve bude mít za úkol vyhodnotit, jestli je zadávané uživatelské jméno uloženo v~databázi. Pokud tomu tak bude, program uživatele požádá o~zadání hesla. Následně se aplikace znovu spojí s~databází a porovná hashe zadaného hesla a hesla uloženého v~databázi. Když je vše v~pořádku, uživatel je přihlášen do aplikace.
+\begin{lstlisting} 
+    def prihlaseni(self): 
+        '''
+        Přihlášení do peněženky
+        '''
+        while True:
+            print("Přihlášení")   
+            print(50*"-") 
+            jmeno = input("Zadejte uživatelské jméno: ")
+            query = f"SELECT id, jmeno, heslo FROM wallet WHERE jmeno='{jmeno}';"
+            overeni = self.nahrat(query).fetchone()
+            row = overeni
+            if overeni != None:
+                row = self.nahrat(query).fetchone()
+                id_uzivatele = row[0], row[1]
+                heslo = row[2]
+                zad_heslo = getpass.getpass("Zadejte heslo: ")
+                zad_heslo = hashlib.sha256(zad_heslo.encode())
+                zad_heslo = zad_heslo.hexdigest()
+                if heslo == zad_heslo:
+                    print (40*" ")
+                    print (40*"-")
+                    print (f"Vítejte {jmeno}")
+                    print (40*"-")
+                    break
+            else:
+                print("Zadali jste nesprávné jméno nebo heslo")
+                opakovani = input("Přejete si zadávat znovu? A/N: ")
+                volba = ["A","a"]
+                if opakovani not in volba:
+                    return False, False
+        return True, id_uzivatele
+\end{lstlisting}
+} 
+	\chapter{Implementace blochainu}
+	\section{Transakce}{
+	Transakce jsou záznamy, které obsahují určitou zprávu. Tato zpráva může obsahovat informace o~převodu peněz mezi uživateli. Transakcí však je i obyčejný text. 
+	}
+	\subsection{Odesílání transakcí}{
+	Pro účely naší aplikace postačí vložit jednoduchou funkci, která vytvoří \textit{python dictionary}. Do tohoto slovníku se budou následně ukládat ID, jméno uživatele a zpráva, kterou chce uživatel uložit. Každá transacke se následně uloží do seznamu nevyřízených transakcí.
+	}
+\begin{lstlisting} 
+	def pridej_transakci(self):
+        """
+        vložení transakce
+        """
+        # VKLADANI DAT
+        zprava = input("Zadejte zprávu: ")
+        ident, autor = id_uzivatele 
+        data = {
+            "id":ident,
+            "odesilatel":autor,
+            "zprava":zprava,
+        }
+        transakce.append(data) 
+\end{lstlisting}
+	\subsection{Ověřování transakcí}{
+K~tomu aby mohla být transakce odeslána a tím pádem i uložena do blockchainu, musí být ověřena ostatními uživateli. Ověřování transakcí probíhá díky algoritmu digitálního podpisu. Každá transakce totiž musí být podepsána. Právě díky digitálnímu podpisu uživatelé v~síti zjistí, jestli je transakce platná. Jelikož je naše aplikace jednoduchá simulace blockchainu založená pouze na ukládání záznamů, ověřování transakcí (záznamů) není potřeba. 
+	}
+	\section{Uzavírání bloku}{
+Další funkcí blockchainové aplikace je uzavírání bloku a jeho následné uložení do blockchainu.
+
+V~systému založeném na PoW blok uzavírá těžař, kterým bude v~našem případě samotný uživatel. Ještě před uzavíráním bloku je potřeba blok připravit. Do bloku při přípravě vloží všechny důležité informace včetně transakcí. Jakmile je blok připraven, začne těžař s~hledáním nonce.
+
+V~naší aplikaci bude blok uzavírat přihlášený uživatel. Funkce připravená pro uzavírání bloku nejprve získá všechny hodnoty, které mají být do bloku uloženy. Následně hodnoty připraví a odešle k~uložení do databáze.
+}
+\begin{lstlisting} 
+	def priprava_bloku(self):
+        """
+        Připraví blok a následně jej uloží do blockchainu
+        """
+        predchozi_hash = block_db.zjisteni_hashe()
+        timestamp = datetime.now()
+        timestamp = datetime.timestamp(timestamp)
+        timestamp = round(timestamp)
+        merkle_root = self.merkle_tree()
+        nonce = self.tezba(predchozi_hash)
+        data = verze_blockchainu, predchozi_hash, str(merkle_root), timestamp, hex(self.target), nonce
+        block_db.insert_zahlavi(data)
+        dotaz = json.dumps(self.transakce)
+        block_db.insert_transakce(dotaz)
+        pocet = len(self.transakce)
+        block_db.insert_pocet(pocet)
+        polozky = data, transakce, pocet
+        velikost = sys.getsizeof(polozky)
+        block_db.insert_velikost(velikost)
+        self.transakce = []
+        return print(f"Blok byl přidán do blockchainu")
+\end{lstlisting}
+	\subsection{Hash předchozího bloku}{
+První hledanou hodnotou bude hash předchozího bloku. Jelikož hash předchozího bloku není nikde uložen, bude potřeba vytvořit samostatnou funkci, která se spojí s~databází blockchainu. Nejdříve bude nutné ověřit, že předchozí blok obsahuje záznamy, ze kterých bude možné vypočítat hash. Když je blok ověřen, funkce z~databáze získá potřebné hodnoty. Poté jsou všechny hodnoty přidány k~sobě, zahashovány a vráceny jako výstup funkce. Pokud by žádný blok neexistoval a v~tom případě by byl ukládaný blok \textit{genesis block}, funkce vrátí namísto hashe hodnotu \textit{None}.\begin{lstlisting}
+	def zjisteni_hashe(self):
+        """
+        vypočítá předchozí hash z~předchozího bloku
+        """
+        max_id = self.kontrola()
+        if max_id != False:
+            query = f"SELECT verze, predchozi_hash, merkle_hash, timestamp, target, nonce FROM zahlavi WHERE id={max_id};"
+            data = self.sql(query).fetchone()
+            verze, predchozi_hash, merkle_hash, timestamp, target, nonce = data
+            previous_hash = str(verze) + str(predchozi_hash) + str(merkle_hash) + str(timestamp) + str(target)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = int(previous_hash.hexdigest(), 16)
+            previous_hash = str(previous_hash) + str(nonce)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = str(previous_hash.hexdigest())
+        else: 
+            previous_hash = "None"
+        return previous_hash 
+\end{lstlisting}
+}
+	\subsection{Časová známka}{
+Druhou potřebnou hodnotou je časová známka neboli \textit{timestamp}. Pro získání časové známky slouží třída \textit{datetime} a  její funkce \textit{timestamp}, která vrátí počet sekund od tzv.\,\textit{Unix epoch} (1.\,1.\,1970). Zpětně poté můžeme vypočítat přesný čas uložení bloku. 
+\begin{lstlisting}
+timestamp = datetime.now()
+timestamp = datetime.timestamp(timestamp)
+timestamp = round(timestamp)
+\end{lstlisting}
+}
+	\subsection{Merkleův strom}{
+Merkleův strom slouží jakožto úložiště transakcí. Všechny transakce jsou společně zahashovány do jednoho hashe. Když poté chce uživatel (partial node) zkontrolovat správnost transakcí, stačí mu porovnat \textit{Merkle root} s~\textit{Merkle root} uživatele, který má stažený celý blockchain se všemi transakcemi (full nodem). V~našem případě slouží merkleův strom pouze jako nástroj pro získání hashe merkleova stromu tzv.\,(\textit{merkle root}).
+
+Pro získání merkleova hashe je potřeba připravit funkci, která vždy vybere dvě položky ze seznamu, přidá je k~sobě a následně zahashuje. Pro naše účely použijeme dvě funkce. První funkce bude posílat seznam záznamů k~vyhodnocení do druhé funkce, která je bude poté hashovat. 
+
+Pokud je seznam záznamů prázdný, nastaví se hodnota \textit{merkle root} na \textit{None}.
+	
+\begin{lstlisting}
+	def merkle_tree(self):
+        """
+        rozdělení transakcí do merkleova stromu
+        """
+        merkle_hash = self.hash_dva(self.transakce)
+        velikost = len(merkle_hash)
+        if velikost == 1:
+            merkle_hash = merkle_hash[0]
+            return merkle_hash
+        elif velikost == 0:
+            merkle_hash = "None"
+        else:
+            while velikost > 2:
+                self.hash_dva(merkle_hash)
+            return merkle_hash 
+\end{lstlisting}    
+Druhá funkce bude sloužit pro samotné hashování vrstev merkleova stromu. Jelikož jsou hashovány páry, musíme zajistit, aby byl počet všech záznamů sudý. K~tomu nám poslouží modulo. Když vyjde počet záznamů lichý, tedy jednička, program automaticky zkopíruje první záznam v~seznamu. Jakmile seznam obsahuje sudý počet záznamů, stačí již postupně přidávat jeden záznam k~druhému a následně je zahashovat. Pro ukládání hashů použijeme nový seznam, který po přidání všech vypočítaných hodnot vrátíme první funkci k~vyhodnocení. Pokud seznam obsahuje pouze jeden hash, je tento hash uložen jako \textit{merkle root}. Když tomu tak není, je znovu spuštěna funkce pro hashování párů.
+\begin{lstlisting}
+	def hash_dva(self, seznam):
+        """
+        zahashování párů
+        """
+        delka = len(seznam)
+        print(delka)
+        modulo = delka%2
+        if modulo == 1:
+            seznam.append(seznam[0])
+            delka = len(seznam)
+        polozka1 = 0
+        polozka2 = 1
+        novy_seznam = []
+        while delka != 0:
+            delka -= 2
+            spojeni = str(seznam[polozka1]) + str(seznam[polozka2])
+            spojeni = hashlib.sha256(spojeni.encode())
+            spojeni = spojeni.hexdigest()
+            polozka1 += 1
+            polozka2 += 1
+            novy_seznam.append(spojeni)
+        return novy_seznam
+\end{lstlisting}
+}
+	\subsection{Proof-of-Work}{
+Proof-of-Work je ověřovací mechanismus blockchainů, které jsou na tomto mechanismu založené. K~ukládání bloků do blockchainu slouží překážka v~podobě nonce, kterou musí těžař před uložením bloku nalézt. Nonci uživatel hledá pomocí využití výpočetní techniky. Výpočetní technika totiž obsahuje program, který zkouší přidávat číslo za hash záhlaví připraveného bloku. Následné zahashování hashe bloku a čísla (nonce) musí být menší než předem stanovená hodnota targetu. Těžař poté zpětně získá nonci.
+
+Target může mít maximálně hodnotu  $2^{256}$, protože hash SHA-256 dosahuje v~krajním případě této hodnoty. Když je hash obsahující nonci menší než target, nonce je nalezena. Snížením hodnoty targetu snížíme také pravděpodobnost nalezení nonce. Snížením pravděpodobnosti nonce se naopak zvýší čas potřebný k~jejímu uhodnutí. Pomocí nastavování obtížnosti targetu je možné manipulovat s~rychlostí uzavírání bloků.
+
+Jelikož náš systém slouží pouze jako simulace, automatické nastavování targetu není potřeba. 
+\begin{lstlisting}
+obtiznost = 14
+self.target = int(2 ** (256 - obtiznost))
+\end{lstlisting}
+
+V~našem případě budeme nejdříve potřebovat nastavit hodnotu \textit{targetu} pomocí proměnné \textit{obtiznost}. Obtížnost nastavuje pravděpodobnost nalezení nonce. Čím větší obtížnost bude, tím se zmenší pravděpodobnost nalezení nonce. V~našem případě postačí předem nastavit obtížnost na hodnotu 14. Jakmile je target nastaven začíná program s~hledáním nonce. Pro zjištění nonce použijeme hash bloku, ke kterému přidáváme hledanou nonci. Na počátku má nonce hodnotu 0. Po přidání nonce k~hashi bloku obě hodnoty společně zahashujeme. Následně porovnáme výsledný hash s~hodnotou targetu. Když má výsledný hash menší nebo stejnou hodnotu jako target, je nonce uložena. Pokud je výsledný hash větší získ
+\begin{lstlisting} 
+	def tezba(self, block_hash):
+        """
+        Proof-of-Work metoda spojená s~uzavíráním bloku
+        """
+        obtiznost = 14
+        self.target = int(2 ** (256 - obtiznost))
+        nonce=0
+        if block_hash == "None":
+            block_hash = ""
+        nonce_hash = block_hash + str(nonce)
+        nonce_hash = hashlib.sha256(nonce_hash.encode())
+        nonce_hash = nonce_hash.hexdigest()
+        nonce_hash = int(nonce_hash, 16)
+        while nonce_hash > self.target:
+            nonce += 1
+            # print (nonce)
+            nonce_hash = block_hash + str(nonce)
+            nonce_hash = hashlib.sha256(nonce_hash.encode())
+            nonce_hash = nonce_hash.hexdigest()
+            nonce_hash = int(nonce_hash, 16)           
+        print (f"Nalezený hash: {hex(nonce_hash)}")
+        print (f"Nalezená nonce: {nonce}")
+        o_nonce = self.overeni_nonce(self, nonce)
+        if o_nonce == True:
+            print ("Nonce schválena")
+            return (nonce)
+        else:
+            print("Nonce nebyla ověřena")
+            self.aplikace.run()
+\end{lstlisting}
+}
+	\section{Ukládání bloků do blockchainu}{
+Když je blok schválen, je uložen do blockchainu. V~našem případě se spustí funkce pro ukládání jednotlivých částí bloku. Nejprve se do tabulky \textit{zahlavi} uloží všechny předem získané hodnoty záhlaví. Následně je potřeba připravit pro ukládání uživatelem zadané zprávy, které jsou připraveny v~python listu. Abychom tyto záznamy mohli uložit, musíme nejprve celý seznam převést do textového řetězce, protože databáze nedokáže seznamy ukládat. K~převedení hodnot nám poslouží modul \textit{json} neboli \textit{Javascript object notation}. Další hodnotou je počet transakcí. Tu zjistíme jednoduše pomocí funkce \textit{len}, která vrátí počet záznamů v~seznamu. Nakonec vezmeme všechny ukládané hodnoty a vypočítáme jejich velikost v~bytech. K~tomu použijeme modul \textit{sys}, který dokáže velikost bloku určit.
+} 
+\begin{lstlisting}
+block_db.insert_zahlavi(data)
+dotaz = json.dumps(self.transakce)
+block_db.insert_transakce(dotaz)
+pocet = len(self.transakce)
+block_db.insert_pocet(pocet)
+polozky = data, transakce, pocet
+velikost = sys.getsizeof(polozky)
+block_db.insert_velikost(velikost)
+\end{lstlisting}
+	\section{Zobrazení blockchainu}
+K~zobrazení blockchainu budeme potřebovat připravit tabulku, která bude připomínat blok. Nejdříve z~databáze získáme hodnoty uložené v~záhlaví bloku. Jelikož je \textit{timestamp} uložena v~sekundách, převedeme jí do lépe čitelného údaje. Když jsou všechny položky připraveny, vytiskneme je.
+\begin{lstlisting}	
+	def zobraz(self, id):
+        """
+        Zobrazí všechny prvky obsažené v~jednom bloku
+        """
+        print ("")
+        query = f"SELECT verze, predchozi_hash, merkle_hash, timestamp, target, nonce FROM zahlavi WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        verze, predchozi_hash, merkle_hash, timestamp, target, nonce = row
+        timestamp = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        print (70*"-") 
+        print (f"# (Číslo bloku: {id})")   
+        print (f"# Verze blockchainu: {verze}")
+        print (f"# Hash předchozího bloku: {predchozi_hash}")
+        print (f"# Kořen Merkleova stromu: {merkle_hash}")
+        print (f"# Čas uzavření bloku: {timestamp}")
+        print (f"# Target: {target}")
+        print (f"# Nonce: {nonce}")
+\end{lstlisting}
+
+Druhou částí bloku jsou transakce. Jako první z~databáze získáme seznam transakcí, který je uložený jako textový řetězec. Ještě před jejich zobrazením musíme zkontrolovat, jestli jsou v~bloku nějaké transakce uloženy. Když blok opravdu obsahuje transakce, je potřeba převést textový řetězec zpět do seznamu. K~tomu nám znovu poslouží \textit{json}. Následně můžeme transakce postupně zobrazit.
+\begin{lstlisting}        
+        
+        query = f"SELECT seznam_transakci FROM transakce WHERE id={id}"
+        row = self.sql(query).fetchone()
+        if row != None:
+            row = json.loads(row[0]) 
+            for polozka in row:
+                print(50*".")
+                print (f"# Jméno autora:",polozka['odesilatel'])
+                print (f"# Zpráva:",polozka['zprava'])
+        else:
+            print("Blok neobsahuje žádné transakce")
+\end{lstlisting}
+Další hodnotou, kterou budeme chtít zobrazit, je počet transakcí. Znovu se nejprve spojíme z~databází a následně hodnotu vytiskneme.
+
+\begin{lstlisting}
+        print (50*"-")
+        query = f"SELECT pocet_transakci FROM pocet WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        row = row[0]
+        print(f"# V~tomto bloku je uloženo {row} záznamů")
+        print (50*"-")
+\end{lstlisting}
+
+Posledním údajem je velikost bloku v~bytech, kterou získáme stejným způsobem jako předchozí hodnoty.
+\begin{lstlisting}
+        query = f"SELECT velikost_bloku FROM velikost WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        row = row[0]
+        print(f"# Velikost bloku je {row} bytů")
+        print (70*"-")
+\end{lstlisting}	
+	\chapter{Struktura aplikace}{
+Aplikace je rozdělená do čtyř tříd. První dvě třídy jsou součástí hlavního programu aplikace. Další dvě třídy jsou poté uloženy do samostatného souboru, který je k~hlavní části programu připojen jakožto modul. 
+
+Hlavní program aplikace obsahuje třídu \textit{App}, která slouží jako rozhraní aplikace. V~této třídě nalezneme hlavní programovou smyčku komunikující s~uživatelem. Jejím hlavním účelem je zobrazit menu, které nabízí různé funkce. Uživatel se může rozhodnout, jestli chce napsat zprávu, uložit blok do blockchainu a nebo blockchain zobrazit. Nechybí zde však ani možnost aplikaci ukončit. 
+
+Další třídou hlavního programu je třída \textit{Blockchain}. Tato třída obsahuje kód pro práci s~blockchainem. Jsou zde tedy zapsány funkce pro přípravu informací, které mají být následně uloženy do blockchainové databáze. Je to tedy např.\,funkce pro získání \textit{Merkle root} a nebo funkce pro těžbu bloku.
+
+Vedlejší soubor obsahuje třídy pro práci s~databází. První třída \textit{Wallet} slouží k~přístupu do databáze obsahující uživatelské údaje. V~této třídě jsou definované funkce obsluhující přihlašování a přidávání nových uživatelů. 
+
+Druhou třídou je \textit{Blockchain\_databáze}, která komunikuje s~databází blockchainu. Hlavním účelem této třídy je přímé ukládání bloků do databáze. Obsahuje však také funkce sloužící k~zobrazení blockchainu a k~vyhledávání jednotlivých bloků.
+}
+\begin{figure}[h]
+\caption{Schéma aplikace}
+\includegraphics[scale=0.6]{Schema}	
+\centering
+\label{Pridavani_bloku}
+\end{figure}
+	\chapter*{Závěr}{
+Ve své práci se věnuji technologii, která kombinuje hned několik vědních odvětví. Blockchain je založen na kryptografii a výpočtech, kterým se věnuje matematika. Kryptoměny a jejich obchodování na burzách je součástí ekonomie. Blockchain také slouží pro ukládání NFT, jejichž prostřednictvím se můžeme umělecky vyjádřit. A~mnoho dalšího. Nakonec je tu informatika, která všechny tyto odvětví spojuje dohromady.
+
+Teoretická část práce měla za cíl zvýšit povědomí o~existenci blockchainu. Dále také ukázat, co všechno stojí za fenoménem kryptoměn. Následně přiblížit ukládání digitálních záznamů do blockchainu v~podobě NFT a nebo poukázat na decentralizované aplikace.
+
+Praktická část slouží k~simulaci základních procesů, které stojí za chodem blockchainové sítě. Aby však naše aplikace mohla sloužit jako samostatná blockchainová síť, museli bychom vytvořit server, ke kterému by se následně připojovali jednotliví uživatelé. Ke zlepšení aplikace by také pomohlo přidání transakčního mechanismu založeném na digitálním podpisu. Transakce by poté bylo možné považovat za opravdu ověřené.
+	}	
+	\nocite{*}
+    \printbibliography					% Vytvoří seznam literatury
+	\addcontentsline{toc}{chapter}{Bibliografie}
+    \listoffigures					
+	\begin{appendices}
+	\chapter*{Seznam příloh}
+	\begin{enumerate}
+	\item{Hlavní program}
+	\item{Modul}
+	\end{enumerate}
+	\chapter{Hlavní program}
+	\begin{lstlisting}
+from Blockchain_db import *
+import hashlib
+from datetime import datetime
+import sys
+import json
+verze_blockchainu = 1.0
+dbwallet = "wallet.db"
+dbblockchain = "blockchain.db"
+class Blockchain(object):
+    def __init__(self):
+        self.aplikace = App()
+        self.transakce = []
+    def pridej_transakci(self):
+        """
+        vložení transakce
+        """
+        zprava = input("Zadejte zprávu: ")
+        ident, autor = id_uzivatele 
+        data = {
+            "id":ident,
+            "odesilatel":autor,
+            "zprava":zprava,
+        }
+        self.transakce.append(data)
+        print(self.transakce)
+    def merkle_tree(self):
+        """
+        rozdělení transakcí do merkleova stromu
+        """
+        merkle_hash = self.hash_dva(self.transakce)
+        velikost = len(merkle_hash)
+        if velikost == 1:
+            merkle_hash = merkle_hash[0]
+            return merkle_hash
+        elif velikost == 0:
+            merkle_hash = "None"
+        else:
+            while velikost > 2:
+                self.hash_dva(merkle_hash)
+            return merkle_hash
+    def hash_dva(self, seznam):
+        """
+        zahashování párů
+        """
+        delka = len(seznam)
+        modulo = delka%2
+        if modulo == 1:
+            seznam.append(seznam[0])
+            delka = len(seznam)
+        polozka1 = 0
+        polozka2 = 1
+        novy_seznam = []
+        while delka != 0:
+            delka -= 2
+            spojeni = str(seznam[polozka1]) + str(seznam[polozka2])
+            spojeni = hashlib.sha256(spojeni.encode())
+            spojeni = spojeni.hexdigest()
+            polozka1 += 1
+            polozka2 += 1
+            novy_seznam.append(spojeni)
+        return novy_seznam
+    def priprava_bloku(self):
+        """
+        Připraví blok a následně jej uloží do blockchainu
+        """
+        predchozi_hash = block_db.zjisteni_hashe()
+        timestamp = datetime.now()
+        timestamp = datetime.timestamp(timestamp)
+        timestamp = round(timestamp)
+        merkle_root = self.merkle_tree()
+        nonce = self.tezba(predchozi_hash)
+        data = verze_blockchainu, predchozi_hash, str(merkle_root), timestamp, hex(self.target), nonce
+        block_db.insert_zahlavi(data)
+        dotaz = json.dumps(self.transakce)
+        block_db.insert_transakce(dotaz)
+        pocet = len(self.transakce)
+        block_db.insert_pocet(pocet)
+        polozky = data, self.transakce, pocet
+        velikost = sys.getsizeof(polozky)
+        block_db.insert_velikost(velikost)
+        self.transakce = []
+        return print(f"Blok byl přidán do blockchainu")
+    def merkle_tree(self):
+        """
+        rozdělení transakcí do merkleova stromu
+        """
+        seznam = []
+        for polozka in self.transakce:
+            seznam.append(polozka)
+        merkle_hash = self.hash_dva(seznam)
+        velikost = len(merkle_hash)
+        if velikost == 1:
+            merkle_hash = merkle_hash[0]
+            return merkle_hash
+        elif velikost == 0:
+            merkle_hash = "None"
+        else:
+            while velikost > 2:
+                self.hash_dva(merkle_hash)
+            return merkle_hash
+    def hash_dva(self, seznam):
+        """
+        zahashování párů
+        """
+        delka = len(seznam)
+        modulo = delka%2
+        if modulo == 1:
+            print(self.transakce)
+            seznam.append(seznam[0])
+            print(self.transakce)
+            delka = len(seznam)
+        polozka1 = 0
+        polozka2 = 1
+        novy_seznam = []
+        while delka != 0:
+            delka -= 2
+            spojeni = str(seznam[polozka1]) + str(seznam[polozka2])
+            spojeni = hashlib.sha256(spojeni.encode())
+            spojeni = spojeni.hexdigest()
+            polozka1 += 1
+            polozka2 += 1
+            novy_seznam.append(spojeni)
+        return novy_seznam
+    
+    def tezba(self, block_hash):
+        """
+        Proof-of-Work metoda spojená s~uzavíráním bloku
+        """
+        obtiznost = 14
+        self.target = int(2 ** (256 - obtiznost)) 
+        nonce=0
+        if block_hash == "None":
+            block_hash = ""
+        nonce_hash = block_hash + str(nonce)
+        nonce_hash = hashlib.sha256(nonce_hash.encode())
+        nonce_hash = nonce_hash.hexdigest()
+        nonce_hash = int(nonce_hash, 16)
+        while nonce_hash > self.target:
+            nonce += 1
+            # print (nonce)
+            nonce_hash = block_hash + str(nonce)
+            nonce_hash = hashlib.sha256(nonce_hash.encode())
+            nonce_hash = nonce_hash.hexdigest()
+            nonce_hash = int(nonce_hash, 16)           
+        print (f"Nalezený hash: {hex(nonce_hash)}")
+        print (f"Nalezená nonce: {nonce}")
+        o_nonce = self.overeni_nonce(self, nonce)
+        if o_nonce == True:
+            print ("Nonce schválena")
+            return (nonce)
+        else:
+            print("Nonce nebyla ověřena")
+            self.aplikace.run()
+    def overeni_nonce(self, block_hash, nonce):
+        """
+        Ověří správnost nonce, simulace ostatních uživatelů
+        """
+        nonce_hash = str(block_hash) + str(nonce)
+        nonce_hash = hashlib.sha256(nonce_hash.encode())
+        nonce_hash = int(nonce_hash.hexdigest(), 16)
+        if nonce_hash > self.target:
+            overeni = True
+        else:
+            overeni = False
+        return overeni
+class App(object):   
+
+    """
+      Třída aplikace pro práci s~blockchainem
+    """
+    def menu(self):
+        """
+        Funkce pro vytisknutí menu a vybrání volby
+        """
+        volby = ["P","V","Z","U","B"]
+        volba = ''
+        while (not volba in volby):
+            print ("\n      MENU")
+            print (30 * "-")
+            print ("  P ... Uložit záznam")
+            print ("  B ... Uzavřít blok")
+            print ("  V~... Vyhledat blok v~blockchainu")
+            print ("  Z~... Zobrazit blockchain")
+            print ("  U~... Ukončit aplikaci")
+            volba = input("Zadejte svou volbu: ")
+            volba = volba.upper()
+        return volba 
+    # hlavní programová smyčka
+    def run(self): # přidat funkci pro uzavírání bloku založenou na čase a pravděpodobnosti
+        """
+          Hlavní programová smyčka
+        """
+        while True:
+            volba = self.menu()
+            if (volba == 'Z'):
+                zkontroluj = block_db.kontrola()
+                if zkontroluj == False:
+                    print ("V blockchainu není uveden žádný záznam")
+                else:
+                    block_db.show()
+            elif (volba == 'V'):
+                zkontroluj = block_db.kontrola()
+                if zkontroluj == False:
+                    print ("V blockchainu není uveden žádný záznam")
+                else:
+                    block_db.search(zkontroluj)
+            elif (volba == 'P'):
+                blockchain.pridej_transakci()
+            elif (volba == 'B'):
+                blockchain.priprava_bloku()
+            else:
+                penezenka.__del__()
+                print ("Na shledanou.")
+                break
+if __name__ == "__main__":
+    print("Poznámkový blok založený na blockchainu")
+    print (50*"-")
+    blockchain = Blockchain()
+    penezenka = Wallet(dbwallet)
+    aplikace = App()
+    uzivatel = input("Chcete přidat nového uživatele? A/N: ")
+    print (50*" ")
+    volba = ["A", "a"]
+    if uzivatel in volba:
+        penezenka.novy_uzivatel()
+    overeni, id_uzivatele = penezenka.prihlaseni()
+    if overeni == True:
+        block_db = Blockchain_databaze(dbblockchain, id_uzivatele)
+        block_db.vytvoreni_blockchainu()
+        aplikace.run()
+    print("Simulace blockchainu ukončena")
+    exit()
+	\end{lstlisting}	
+	\chapter{Modul}
+	\begin{lstlisting}
+import sqlite3
+import hashlib
+from datetime import datetime
+import json
+import getpass
+class Wallet():
+    def __init__(self, dbwallet):
+        self.dbfile = dbwallet
+        self.conn = sqlite3.connect(dbwallet)
+        self.cur = self.conn.cursor()
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS wallet
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            jmeno NOT NULL,
+                            heslo NOT NULL
+                        );''')
+    def nahrat(self, dotaz, data=None):
+        '''
+        vložení do SQLite databaze s~commitem
+        '''    
+        if data == None:
+            self.cur.execute(dotaz)
+        else:
+            self.cur.execute(dotaz,data)
+        self.conn.commit() # potvrzení změn
+        return self.cur
+    def insert_wallet(self, data):
+        '''
+        ukládání dat do peněženky
+        '''    
+        query = "INSERT INTO wallet (jmeno, heslo)"
+        query = query + "VALUES (?,?);"
+        self.nahrat(query,data)
+    def prihlaseni(self): 
+        '''
+        Přihlášení do peněženky
+        '''
+        while True:
+            print("Přihlášení")   
+            print(50*"-") 
+            jmeno = input("Zadejte uživatelské jméno: ")
+            query = f"SELECT id, jmeno, heslo FROM wallet WHERE jmeno='{jmeno}';"
+            overeni = self.nahrat(query).fetchone()
+            row = overeni
+            if overeni != None:
+                row = self.nahrat(query).fetchone()
+                id_uzivatele = row[0], row[1]
+                heslo = row[2]
+                zad_heslo = getpass.getpass("Zadejte heslo: ")
+                zad_heslo = hashlib.sha256(zad_heslo.encode())
+                zad_heslo = zad_heslo.hexdigest()
+                if heslo == zad_heslo:
+                    print (40*" ")
+                    print (40*"-")
+                    print (f"Vítejte {jmeno}")
+                    print (40*"-")
+                    break
+            else:
+                print("Zadali jste nesprávné jméno nebo heslo")
+                opakovani = input("Přejete si zadávat znovu? A/N: ")
+                volba = ["A","a"]
+                if opakovani not in volba:
+                    return False, False
+        return True, id_uzivatele
+    def novy_uzivatel(self):
+        """
+        vytvoří profil nového uživatele
+        """
+        while True:
+            jmeno = input("Zadejte uživatelské jméno: ")
+            query = "SELECT jmeno FROM wallet"
+            overeni = self.nahrat(query).fetchall()
+            jmena = []
+            for prvek in overeni:
+                prvek = prvek[0]
+                jmena.append(prvek)
+            if jmeno not in jmena:
+                heslo = getpass.getpass("Zadejte heslo: ")
+                heslo = hashlib.sha256(heslo.encode())
+                heslo = heslo.hexdigest()
+                data = jmeno, heslo
+                self.insert_wallet(data)
+                break
+            else:
+                print("Toto uživatelské jméno již existuje")
+        return 
+    def __del__(self):
+        """
+        Uzavře spojení s~databází
+        """
+        self.conn.close()
+class Blockchain_databaze(object):
+    def __init__(self, dbblockchain, id_uzivatele):
+        self.dbblockchain = dbblockchain
+        self.id_uzivatele = id_uzivatele
+        self.ident, self.uzivatel = self.id_uzivatele
+    def vytvoreni_blockchainu(self):
+        """
+        vytvoří databázi pro blockchain
+        """
+        query = ('''CREATE TABLE IF NOT EXISTS zahlavi
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                verze NOT NULL,
+                                predchozi_hash,
+                                merkle_hash,
+                                timestamp INTEGER NOT NULL,
+                                target NOT NULL,
+                                nonce NOT NULL
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS transakce
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                seznam_transakci
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS velikost
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                velikost_bloku INTEGER NOT NULL
+                            );''')
+        self.sql(query)
+        query = ('''CREATE TABLE IF NOT EXISTS pocet
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                pocet_transakci NOT NULL
+                            );''')
+        self.sql(query)
+        return
+    def sql(self, dotaz, data=None):
+        """
+        vložení do SQLite databáze s~commitem
+        """
+        conn = sqlite3.connect(self.dbblockchain)
+        cursor = conn.cursor() 
+        if data == None:
+            cursor.execute(dotaz)
+        else:
+            cursor.execute(dotaz,data)
+        conn.commit() # potvrzení změn
+        return cursor
+    def zjisteni_hashe(self):
+        """
+        vypočítá předchozí hash z~předchozího bloku
+        """
+        max_id = self.kontrola()
+        if max_id != False:
+            query = f"SELECT verze, predchozi_hash, merkle_hash, timestamp, target, nonce FROM zahlavi WHERE id={max_id};"
+            data = self.sql(query).fetchone()
+            verze, predchozi_hash, merkle_hash, timestamp, target, nonce = data
+            previous_hash = str(verze) + str(predchozi_hash) + str(merkle_hash) + str(timestamp) + str(target)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = int(previous_hash.hexdigest(), 16)
+            previous_hash = str(previous_hash) + str(nonce)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = str(previous_hash.hexdigest())
+        else: 
+            previous_hash = "None"
+        return previous_hash
+    def insert_zahlavi(self, data):
+        """
+        vložení záhlaví do blockchainu
+        """
+        query = "INSERT INTO zahlavi (verze, predchozi_hash, merkle_hash, timestamp, target, nonce)"         
+        query = query + " VALUES (?,?,?,?,?,?);"
+        self.sql(query,data)
+    def insert_transakce(self, data):
+        """
+        vloží transakce do blockchainu
+        """    
+        data = [data]
+        query = "INSERT INTO transakce (seznam_transakci)" 
+        query = query + " VALUES (?);"
+        self.sql(query, data)
+    def insert_velikost(self, data):
+        """
+        vloží velikost bloku do blockchainu
+        """ 
+        data = [data]
+        query = "INSERT INTO velikost (velikost_bloku)" 
+        query = query + " VALUES (?);"
+        self.sql(query,data)
+    def insert_pocet(self, data):
+        """
+        vloží počet transakcí do blockchainu
+        """   
+        data = str(data)
+        query = "INSERT INTO pocet (pocet_transakci)" 
+        query = query + " VALUES (?);"
+        self.sql(query,data)
+        return
+    def show(self):
+        """
+        zobrazí blockchain
+        """
+        query = "SELECT count(id) FROM zahlavi"
+        pocet_bloku = self.sql(query).fetchone()
+        pocet_bloku = pocet_bloku[0]
+        id = 0
+        while pocet_bloku > id:
+            id += 1
+            self.zobraz(id)
+        return 
+    def zobraz(self, id):
+        """
+        Zobrazí všechny prvky obsažené v~jednom bloku
+        """
+        print ("")
+        query = f"SELECT verze, predchozi_hash, merkle_hash, timestamp, target, nonce FROM zahlavi WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        verze, predchozi_hash, merkle_hash, timestamp, target, nonce = row
+        timestamp = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        print (70*"-") 
+        print (f"# (Číslo bloku: {id})")   
+        print (f"# Verze blockchainu: {verze}")
+        print (f"# Hash předchozího bloku: {predchozi_hash}")
+        print (f"# Kořen Merkleova stromu: {merkle_hash}")
+        print (f"# Čas uzavření bloku: {timestamp}")
+        print (f"# Target: {target}")
+        print (f"# Nonce: {nonce}")
+        query = f"SELECT seznam_transakci FROM transakce WHERE id={id}"
+        row = self.sql(query).fetchone()
+        if row != None:
+            row = json.loads(row[0]) 
+            for polozka in row:
+                print(50*".")
+                print (f"# Jméno autora:",polozka['odesilatel'])
+                print (f"# Zpráva:",polozka['zprava'])
+        else:
+            print("Blok neobsahuje žádné transakce")
+        print (50*"-")
+        query = f"SELECT pocet_transakci FROM pocet WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        row = row[0]
+        print(f"# V~tomto bloku je uloženo {row} záznamů")
+        print (50*"-")
+        query = f"SELECT velikost_bloku FROM velikost WHERE id={id}" 
+        row = self.sql(query).fetchone()
+        row = row[0]
+        print(f"# Velikost bloku je {row} bytů")
+        print (70*"-")
+    def kontrola(self):
+        """
+        zjištění počtu záznamů v~databázi
+        """
+        query= "SELECT MAX(id) FROM zahlavi"
+        check = self.sql(query).fetchone()
+        check = check[0]
+        if check != None:
+            return check
+        else:
+            return False
+    def zjisteni_hashe(self):
+        """
+        vypočítá předchozí hash z~předchozího bloku
+        """
+        max_id = self.kontrola()
+        if max_id != False:
+            query = f"SELECT verze, predchozi_hash, merkle_hash, timestamp, target, nonce FROM zahlavi WHERE id={max_id};"
+            data = self.sql(query).fetchone()
+            verze, predchozi_hash, merkle_hash, timestamp, target, nonce = data
+            previous_hash = str(verze) + str(predchozi_hash) + str(merkle_hash) + str(timestamp) + str(target)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = int(previous_hash.hexdigest(), 16)
+            previous_hash = str(previous_hash) + str(nonce)
+            previous_hash = hashlib.sha256(previous_hash.encode())
+            previous_hash = str(previous_hash.hexdigest())
+        else: 
+            previous_hash = "None"
+        return previous_hash
+    def search(self, max_id):
+        """
+        vyhledání bloku v~blockchainu podle čísla bloku
+        """
+        print(f"Číslo posledního uloženého bloku je {max_id}")
+        blok = int(input("Zadejte číslo hledaného bloku: "))
+        print (50*"-")
+        if blok <= max_id:
+            self.zobraz(blok)
+        else: 
+            print ("Hledaný blok nebyl nalezen")
+	\end{lstlisting}
+	\end{appendices}
+\end{document}
